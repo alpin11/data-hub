@@ -136,24 +136,31 @@ class AssetType
      */
     public function resolveData($value = null, $args = [], $context = [], ResolveInfo $resolveInfo = null)
     {
-        $asset = $this->getAssetFromValue($value, $context);
+        $cacheKey = sprintf('asset_base64_%s', md5($value['id']));
 
-        if ($asset instanceof Asset\Image || $asset instanceof Asset\Video) {
-            $data = stream_get_contents($asset->getStream());
+        if(!$base64String = Cache::load($cacheKey)) {
+            $asset = $this->getAssetFromValue($value, $context);
 
-            return isset($args['thumbnail'])
-                ? base64_encode(stream_get_contents($asset->getThumbnail($args['thumbnail'],
-                    false)->getStream()))
-                : base64_encode(stream_get_contents($asset->getStream()));
-        } elseif ($asset instanceof Asset\Document) {
-            return isset($args['thumbnail'])
-                ? base64_encode(stream_get_contents($asset->getImageThumbnail($args['thumbnail'])->getStream()))
-                : base64_encode(stream_get_contents($asset->getStream()));
-        } elseif ($asset instanceof Asset) {
-            return base64_encode(stream_get_contents($asset->getStream()));
+            if ($asset instanceof Asset\Image || $asset instanceof Asset\Video) {
+                $data = stream_get_contents($asset->getStream());
+
+                $base64String = isset($args['thumbnail'])
+                    ? base64_encode(stream_get_contents($asset->getThumbnail($args['thumbnail'],
+                        false)->getStream()))
+                    : base64_encode(stream_get_contents($asset->getStream()));
+
+            } elseif ($asset instanceof Asset\Document) {
+                $base64String = isset($args['thumbnail'])
+                    ? base64_encode(stream_get_contents($asset->getImageThumbnail($args['thumbnail'])->getStream()))
+                    : base64_encode(stream_get_contents($asset->getStream()));
+            } elseif ($asset instanceof Asset) {
+                $base64String = base64_encode(stream_get_contents($asset->getStream()));
+            }
+
+            Cache::save($base64String, $cacheKey, [], 8 * 3600);
         }
 
-        return null;
+        return $base64String;
     }
 
     /**
