@@ -21,6 +21,7 @@ use Pimcore\Bundle\DataHubBundle\GraphQL\Traits\ElementTagTrait;
 use Pimcore\Bundle\DataHubBundle\GraphQL\Traits\ServiceTrait;
 use Pimcore\Bundle\DataHubBundle\WorkspaceHelper;
 use Pimcore\Model\Asset;
+use Pimcore\Cache;
 
 class AssetType
 {
