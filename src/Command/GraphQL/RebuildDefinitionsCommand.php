@@ -76,6 +76,6 @@ class RebuildDefinitionsCommand extends AbstractCommand
 
         $this->output->writeln('done');
 
-        return Command::SUCCESS;
+        return 0;
     }
 }
